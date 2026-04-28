@@ -1,4 +1,3 @@
-
 export const zoomToSelectedText = async (
   engine,
   paddingTop = 0,
