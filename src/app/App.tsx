@@ -60,7 +60,7 @@ export default function App({ engineConfig }: AppProps) {
   const [engine, setEngine] = useState(null);
 
   const config: Partial<Configuration> = {
-    role: 'Adopter',
+    ...engineConfig,
     featureFlags: {
       preventScrolling: true,
       ...engineConfig.featureFlags
@@ -77,6 +77,7 @@ export default function App({ engineConfig }: AppProps) {
             configure={async (engine) => {
               setEngine(engine);
               engine.editor.setSetting('page/title/show', false);
+              engine.editor.setRole('Adopter');
 
               // Add asset sources
               await engine.addPlugin(new ColorPaletteAssetSource());
