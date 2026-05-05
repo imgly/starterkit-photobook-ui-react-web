@@ -15,6 +15,7 @@
 .headline {
   min-width: 80px;
   color: #161617;
+  font-family: var(--font-family-ibm-sans);
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.02em;

@@ -13,6 +13,7 @@
 
 .headline {
   color: #161617;
+  font-family: var(--font-family-ibm-sans);
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -69,7 +70,7 @@
   padding: 8px;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 8px;
-  font-family: 'IBM Plex Sans';
+  font-family: var(--font-family-ibm-sans);
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
