@@ -38,9 +38,7 @@ export const ColorPicker = ({
   const pickerRef = useRef<HTMLDivElement | null>(null);
   useOnClickOutside(pickerRef, () => pickerOpen && setPickerOpen(false));
 
-  const TriggerComponent = children ? (
-    children
-  ) : (
+  const TriggerComponent = children || (
     <label
       htmlFor={name}
       className={classNames(
@@ -52,7 +50,7 @@ export const ColorPicker = ({
       <span
         className={classes.colorPreviewSpan}
         style={{ backgroundColor: value }}
-      ></span>
+      />
       <span className={classes.input} id={name} />
       <CaretBottom />
     </label>
@@ -89,7 +87,7 @@ export const ColorPicker = ({
                   handleChange(color);
                 }}
                 className={classes.colorPreset}
-              ></button>
+              />
             ))}
           </div>
         )}
