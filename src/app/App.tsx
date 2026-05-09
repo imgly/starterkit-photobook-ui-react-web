@@ -60,6 +60,7 @@ export default function App({ engineConfig }: AppProps) {
   const [engine, setEngine] = useState(null);
 
   const config: Partial<Configuration> = {
+    role: 'Adopter',
     ...engineConfig,
     featureFlags: {
       preventScrolling: true,
