@@ -30,7 +30,6 @@ export function EngineProvider({
 
     const loadEngine = async () => {
       if (import.meta.env.CESDK_USE_LOCAL) {
-        config.baseURL = import.meta.env.VITE_CESDK_ASSETS_BASE_URL;
       }
 
       localEngine = await CreativeEngine.init(config);

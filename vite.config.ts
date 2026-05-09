@@ -1,8 +1,9 @@
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
-import { defineConfig } from 'vite';
 
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     svgr({
@@ -14,5 +15,8 @@ export default defineConfig({
   ],
   server: {
     port: 5173
+  },
+  resolve: {
+    dedupe: ['react', 'react-dom']
   }
 });
