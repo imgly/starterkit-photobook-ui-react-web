@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import type { Configuration } from '@cesdk/engine';
 import {
+  ImageColorsAssetSource,
   ColorPaletteAssetSource,
   TextAssetSource,
   TextComponentAssetSource,
@@ -60,6 +61,7 @@ export default function App({ engineConfig }: AppProps) {
   const [engine, setEngine] = useState(null);
 
   const config: Partial<Configuration> = {
+    role: 'Adopter',
     ...engineConfig,
     featureFlags: {
       preventScrolling: true,
@@ -80,6 +82,7 @@ export default function App({ engineConfig }: AppProps) {
               engine.editor.setRole('Adopter');
 
               // Add asset sources
+              await engine.addPlugin(new ImageColorsAssetSource());
               await engine.addPlugin(new ColorPaletteAssetSource());
               await engine.addPlugin(new TypefaceAssetSource());
               await engine.addPlugin(new TextAssetSource());
