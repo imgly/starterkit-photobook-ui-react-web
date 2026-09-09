@@ -10,6 +10,7 @@ import { useEngine } from './EngineContext';
 import { useSinglePageMode } from './SinglePageModeContext';
 import { usePagePreview } from './PagePreviewContext';
 
+
 /**
  * Demo assets for this example (images, scenes, fonts, …) are loaded from
  * the IMG.LY CDN by default. To host them yourself, copy this kit's asset
@@ -19,7 +20,7 @@ import { usePagePreview } from './PagePreviewContext';
  */
 export const DEMO_ASSETS_BASE_URL: string =
   import.meta.env.VITE_DEMO_ASSETS_BASE_URL ||
-  'https://staticimgly.com/imgly/cesdk-web-examples-data/1.81.1/starterkit-photobook-ui';
+  'https://staticimgly.com/imgly/cesdk-web-examples-data/1.82.0-rc.2/starterkit-photobook-ui';
 
 const template = {
   name: 'Example Photobook',
