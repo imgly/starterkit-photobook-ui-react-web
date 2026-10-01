@@ -13,34 +13,40 @@ export const createApplyLayoutAsset = (
     engine.editor.setGlobalScope('lifecycle/destroy', 'Allow');
 
     const page = engine.scene.getCurrentPage();
-    engine.block
-      .findAllSelected()
-      .forEach((block) => engine.block.setSelected(block, false));
-    const sceneString = await fetch(asset.meta.uri).then((response) =>
-      response.text()
-    );
-    // Load the layout page from the scene string
-    const blocks = await engine.block.loadFromString(sceneString);
-    const layoutPage = blocks[0];
-    const oldPage = engine.block.duplicate(page);
-    // Delete all children from pageToApplyLayout
-    engine.block.getChildren(page).forEach((child) => {
-      engine.block.destroy(child);
-    });
-    // Copy all children from layoutPage to pageToApplyLayout
-    engine.block.getChildren(layoutPage).forEach((child) => {
-      engine.block.insertChild(
-        page,
-        child,
-        engine.block.getChildren(page).length
+    let oldPage;
+    let layoutPage;
+    try {
+      engine.block
+        .findAllSelected()
+        .forEach((block) => engine.block.setSelected(block, false));
+      const sceneString = await fetch(asset.meta.uri).then((response) =>
+        response.text()
       );
-    });
-    // Copy all asset (images/ text) content from the old page to the new layout page
-    copyAssets(engine, oldPage, page);
-
-    engine.block.destroy(oldPage);
-    engine.block.destroy(layoutPage);
-    engine.editor.setGlobalScope('lifecycle/destroy', scopeBefore);
+      // Load the layout page from the scene string
+      const blocks = await engine.block.loadFromString(sceneString);
+      layoutPage = blocks[0];
+      oldPage = engine.block.duplicate(page);
+      // Delete all children from pageToApplyLayout
+      engine.block.getChildren(page).forEach((child) => {
+        engine.block.destroy(child);
+      });
+      // Copy all children from layoutPage to pageToApplyLayout
+      engine.block.getChildren(layoutPage).forEach((child) => {
+        engine.block.insertChild(
+          page,
+          child,
+          engine.block.getChildren(page).length
+        );
+      });
+      // Copy all asset (images/ text) content from the old page to the new layout page
+      copyAssets(engine, oldPage, page);
+    } finally {
+      // Without this the scene stays destroyable and the duplicate stays behind
+      // when the fetch or the scene string fails.
+      if (oldPage !== undefined) engine.block.destroy(oldPage);
+      if (layoutPage !== undefined) engine.block.destroy(layoutPage);
+      engine.editor.setGlobalScope('lifecycle/destroy', scopeBefore);
+    }
     if (config.addUndoStep) {
       engine.editor.addUndoStep();
     }
@@ -92,7 +98,9 @@ const copyAssets = (engine, fromPageId, toPageId) => {
     try {
       const fromTypeface = engine.block.getTypeface(fromBlock);
       engine.block.setFont(toBlock, fromFontFileUri, fromTypeface);
-    } catch {}
+    } catch {
+      // The source block carries no typeface; keep the target font.
+    }
     const fromTextFillColor = engine.block.getColor(
       fromBlock,
       'fill/solid/color'
