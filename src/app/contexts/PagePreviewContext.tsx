@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useEngine } from './EngineContext';
 import { useSinglePageMode } from './SinglePageModeContext';
 
@@ -30,11 +23,6 @@ interface PagePreview {
 }
 type PagePreviews = Record<number, PagePreview>;
 
-// Three times the 96 x 68 px preview in the page rail, sharp on high-density
-// screens. A full-size page is 3508 x 2480 px and slows start-up for nothing.
-const PREVIEW_WIDTH = 288;
-const PREVIEW_HEIGHT = 204;
-
 export function PagePreviewProvider({
   children
 }: PagePreviewProviderProps): React.ReactNode {
@@ -42,13 +30,12 @@ export function PagePreviewProvider({
   const { currentPageBlockId, sortedPageIds } = useSinglePageMode();
   const [pagePreviews, setPagePreviews] = useState<PagePreviews>({});
   const [enabled, setEnabled] = useState<boolean>(false);
-  const objectURLs = useRef<Record<number, string>>({});
 
   useEffect(() => {
     if (!currentPageBlockId) {
       return;
     }
-    const unsubscribe = engine.editor.onHistoryUpdatedWithKind(() => {
+    const unsubscribe = engine.editor.onHistoryUpdated(() => {
       setPagePreviews((pagePreviews) => ({
         ...pagePreviews,
         [currentPageBlockId]: {
@@ -120,41 +107,30 @@ export function PagePreviewProvider({
       for (let index = 0; index < pageIdPreviewsToGenerate.length; index++) {
         const pageId = pageIdPreviewsToGenerate[index];
         await new Promise((resolve) => requestAnimationFrame(resolve));
-        // Deleting a page while its preview is queued, or while it exports, is
-        // a normal user action rather than a failure.
-        if (!engine.block.isValid(pageId)) {
-          continue;
-        }
-        let blob: Blob;
-        try {
-          blob = await engine.block.export(pageId, {
+        if (engine.block.isValid(pageId)) {
+          // @ts-ignore
+          const blob = await engine.block.export(pageId, {
             mimeType: 'image/jpeg',
-            jpegQuality: 0.5,
-            targetWidth: PREVIEW_WIDTH,
-            targetHeight: PREVIEW_HEIGHT
+            jpegQuality: 0.5
           });
-        } catch (error) {
-          if (engine.block.isValid(pageId)) {
-            throw error;
-          }
-          continue;
-        }
-        const stale = objectURLs.current[pageId];
-        const path = URL.createObjectURL(blob);
-        objectURLs.current[pageId] = path;
-        setPagePreviews((before) => ({
-          ...before,
-          [pageId]: {
-            ...before[pageId],
-            path,
-            isLoading: false,
-            isDirty: false
-          }
-        }));
-        // Revoking before React has swapped the <img> src leaves the old
-        // element pointing at a URL the browser can no longer resolve.
-        if (stale) {
-          requestAnimationFrame(() => URL.revokeObjectURL(stale));
+          setPagePreviews((before) => {
+            if (before[pageId]?.path) {
+              try {
+                URL.revokeObjectURL(before[pageId].path!);
+              } catch {}
+            }
+            return {
+              ...before,
+              [pageId]: {
+                ...before[pageId],
+                path: URL.createObjectURL(blob),
+                isLoading: false,
+                isDirty: false
+              }
+            };
+          });
+        } else {
+          console.error('PageId', pageId, 'not valid');
         }
       }
     };
