@@ -19,7 +19,7 @@ async function loadAssetSourceFromContentJSON(
         ? Object.fromEntries(
             Object.entries(asset.meta).map(([key, value]) => [
               key,
-              value.toString().replace('{{base_url}}', baseURL)
+              String(value).replace('{{base_url}}', baseURL)
             ])
           )
         : asset.meta,

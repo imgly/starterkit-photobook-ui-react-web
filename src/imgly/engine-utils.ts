@@ -1,14 +1,16 @@
+import type CreativeEngine from '@cesdk/engine';
+
 export const zoomToSelectedText = async (
-  engine,
+  engine: CreativeEngine,
   paddingTop = 0,
   paddingBottom = 0
 ) => {
-  const canvasBounding = engine.element.getBoundingClientRect();
+  const canvasBounding = engine.element!.getBoundingClientRect();
   const canvasHeight = canvasBounding.height * window.devicePixelRatio;
   const overlapBottom = Math.max(
     (canvasBounding.top +
       canvasBounding.height -
-      window.visualViewport.height) *
+      window.visualViewport!.height) *
       window.devicePixelRatio,
     0
   );
@@ -39,18 +41,18 @@ export const zoomToSelectedText = async (
   }
 };
 
-export const pixelToCanvasUnit = (engine, pixel) => {
+export const pixelToCanvasUnit = (engine: CreativeEngine, pixel: number) => {
   const sceneUnit = engine.block.getEnum(
-    engine.scene.get(),
+    engine.scene.get()!,
     'scene/designUnit'
   );
   let densityFactor = 1;
   if (sceneUnit === 'Millimeter') {
     densityFactor =
-      engine.block.getFloat(engine.scene.get(), 'scene/dpi') / 25.4;
+      engine.block.getFloat(engine.scene.get()!, 'scene/dpi') / 25.4;
   }
   if (sceneUnit === 'Inch') {
-    densityFactor = engine.block.getFloat(engine.scene.get(), 'scene/dpi');
+    densityFactor = engine.block.getFloat(engine.scene.get()!, 'scene/dpi');
   }
   return (
     pixel /
@@ -60,9 +62,9 @@ export const pixelToCanvasUnit = (engine, pixel) => {
 
 // Appends a block into the scene and positions it somewhat randomly.
 export const autoPlaceBlockOnPage = (
-  engine,
-  page,
-  block,
+  engine: CreativeEngine,
+  page: number,
+  block: number,
   config = {
     basePosX: 0.25,
     basePosY: 0.25,
@@ -91,23 +93,25 @@ export const autoPlaceBlockOnPage = (
   engine.editor.addUndoStep();
 };
 
-export function getImageSize(url) {
+export function getImageSize(url: string) {
   const img = document.createElement('img');
 
-  const promise = new Promise((resolve, reject) => {
-    img.onload = () => {
-      // Natural size is the actual image size regardless of rendering.
-      // The 'normal' `width`/`height` are for the **rendered** size.
-      const width = img.naturalWidth;
-      const height = img.naturalHeight;
+  const promise = new Promise<{ width: number; height: number }>(
+    (resolve, reject) => {
+      img.onload = () => {
+        // Natural size is the actual image size regardless of rendering.
+        // The 'normal' `width`/`height` are for the **rendered** size.
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
 
-      // Resolve promise with the width and height
-      resolve({ width, height });
-    };
+        // Resolve promise with the width and height
+        resolve({ width, height });
+      };
 
-    // Reject promise on error
-    img.onerror = reject;
-  });
+      // Reject promise on error
+      img.onerror = reject;
+    }
+  );
 
   // Setting the source makes it start downloading and eventually call `onload`
   img.src = url;
