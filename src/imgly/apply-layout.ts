@@ -1,26 +1,29 @@
+import type CreativeEngine from '@cesdk/engine';
+import type { AssetResult } from '@cesdk/engine';
+
 /**
  * Creates a function that can be used to apply a layout asset to the current page
- * @param {import('@cesdk/engine').default} engine
- * @param {Object} config
+ * @param engine
+ * @param config
  * @returns a function that can be used to apply a layout asset to the current page
  */
 export const createApplyLayoutAsset = (
-  engine,
+  engine: CreativeEngine,
   config = { addUndoStep: true }
 ) => {
-  return async (asset) => {
+  return async (asset: AssetResult) => {
     const scopeBefore = engine.editor.getGlobalScope('lifecycle/destroy');
     engine.editor.setGlobalScope('lifecycle/destroy', 'Allow');
 
-    const page = engine.scene.getCurrentPage();
-    let oldPage;
-    let layoutPage;
+    const page = engine.scene.getCurrentPage()!;
+    let oldPage: number | undefined;
+    let layoutPage: number | undefined;
     try {
       engine.block
         .findAllSelected()
         .forEach((block) => engine.block.setSelected(block, false));
-      const sceneString = await fetch(asset.meta.uri).then((response) =>
-        response.text()
+      const sceneString = await fetch(asset.meta!.uri as string).then(
+        (response) => response.text()
       );
       // Load the layout page from the scene string
       const blocks = await engine.block.loadFromString(sceneString);
@@ -56,11 +59,15 @@ export const createApplyLayoutAsset = (
 
 /**
  * Copies image files and text block contents from one page to another, while retaining the layout.
- * @param {import('@cesdk/engine').default} engine
- * @param {Number} fromPageId
- * @param {Number} toPageId
+ * @param engine
+ * @param fromPageId
+ * @param toPageId
  */
-const copyAssets = (engine, fromPageId, toPageId) => {
+const copyAssets = (
+  engine: CreativeEngine,
+  fromPageId: number,
+  toPageId: number
+) => {
   const fromChildren = visuallySortBlocks(
     engine,
     getChildrenTree(engine, fromPageId).flat()
@@ -147,7 +154,7 @@ const copyAssets = (engine, fromPageId, toPageId) => {
   }
 };
 
-const getChildrenTree = (engine, block) => {
+const getChildrenTree = (engine: CreativeEngine, block: number): number[] => {
   const children = engine.block.getChildren(block);
   return [
     ...children,
@@ -157,18 +164,18 @@ const getChildrenTree = (engine, block) => {
 
 /**
  * Sorts an array of blocks from top to bottom, left to right based on the upper left edge coordinates
- * @param {*} engine
- * @param {*} blocks
+ * @param engine
+ * @param blocks
  * @returns Sorted Block Ids
  */
-const visuallySortBlocks = (engine, blocks) => {
+const visuallySortBlocks = (engine: CreativeEngine, blocks: number[]) => {
   const blocksWithCoordinates = blocks
     .map((block) => ({
       block,
       coordinates: [
         Math.round(engine.block.getPositionX(block)),
         Math.round(engine.block.getPositionY(block))
-      ]
+      ] as [number, number]
     }))
     .sort(({ coordinates: [X1, Y1] }, { coordinates: [X2, Y2] }) => {
       if (Y1 === Y2) return X1 - X2;
